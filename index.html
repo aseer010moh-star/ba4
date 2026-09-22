@@ -1,3 +1,4 @@
+Index.html
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -188,7 +189,8 @@
         </div>
         <div class="input-group">
             <label>كود الطالب:</label>
-            <input type="number" id="student-code" placeholder="أدخل كود الطالب الخص بك">
+            <!-- استخدام type="password" لإخفاء الكود بنجوم -->
+            <input type="password" id="student-code" placeholder="أدخل كود الطالب الخاص بك">
         </div>
         <button class="btn" onclick="startQuiz()">بدء الاختبار</button>
     </div>
@@ -205,21 +207,21 @@
 
     <!-- 3. شاشة النتيجة -->
     <div id="result-screen" class="hidden">
-        <h3>🎯 تم إنهاء الاختبار بنجاح</h3>
+        <h3> تم إنهاء الاختبار بنجاح</h3>
         <div class="circle-score" id="score-circle">
             <div id="score-text">0</div>
             <span>من 40</span>
         </div>
 
         <div class="info-card">
-            <div>👤 <b>اسم الطالب:</b> <span id="res-name"></span></div>
-            <div>🆔 <b>كود الطالب:</b> <span id="res-code"></span></div>
-            <div>🏅 <b>التقدير العام:</b> <span id="res-grade"></span></div>
+            <div> <b>اسم الطالب:</b> <span id="res-name"></span></div>
+            <!-- تم حذف سطر كود الطالب بناءً على طلبك -->
+            <div> <b>التقدير العام:</b> <span id="res-grade"></span></div>
             <div>⏱️ <b>الوقت المستغرق:</b> <span id="res-time"></span></div>
             <div>✅ <b>النتيجة النهائية:</b> <span id="res-score"></span> من 40</div>
         </div>
 
-        <button class="btn" onclick="location.reload()">إعادة الاختبار 🔄</button>
+        <button class="btn" onclick="location.reload()">إعادة الاختبار </button>
     </div>
 
     <div class="footer-rights">
@@ -227,12 +229,13 @@
     </div>
 </div>
 
+<!-- إطار خفي لإرسال البيانات دون إعادة تحميل الصفحة -->
+<iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
+
 <script>
-    // بيانات البوت والدردشة الخاصة بك على تليجرام
     const BOT_TOKEN = "7953282245:AAGIlyAAnbJ4I50-cR08c4K3S53_lIs04S0";
     const CHAT_ID = "6790938637";
 
-    // قائمة الأسئلة (يمكنك تغييرها وتعديلها)
     const questions = [
         { q: "س1: وحدة قياس عزم القوة في الجملة الدولية هي:", options: ["N.m", "N/m", "J.s", "N"], correct: 0 },
         { q: "س2: يكون عزم القوة معدوماً إذا كان حامل القوة:", options: ["يعامد محور الدوران", "يوازي محور الدوران أو يقطعه", "يبعد عن محور الدوران", "يمس محور الدوران"], correct: 1 },
@@ -245,7 +248,7 @@
     let studentName = "";
     let studentCode = "";
     let startTime, timerInterval;
-    let wrongQuestions = []; // لتخزين أرقام الأسئلة الخاطئة
+    let wrongQuestions = [];
 
     function startQuiz() {
         studentName = document.getElementById('student-name').value.trim();
@@ -301,9 +304,9 @@
 
         const answer = parseInt(selected.value);
         if (answer === questions[currentQ].correct) {
-            score += 10; // 10 درجات لكل سؤال (مجموع 40)
+            score += 10;
         } else {
-            wrongQuestions.push(currentQ + 1); // تسجيل رقم السؤال الخاطئ
+            wrongQuestions.push(currentQ + 1);
         }
 
         currentQ++;
@@ -324,52 +327,59 @@
         document.getElementById('result-screen').classList.remove('hidden');
 
         document.getElementById('res-name').innerText = studentName;
-        document.getElementById('res-code').innerText = studentCode;
         document.getElementById('res-score').innerText = score;
         document.getElementById('res-time').innerText = `${minutes} دقيقة و ${seconds} ثانية`;
 
         let grade = "";
-        if (score >= 35) grade = "ممتاز 🏆";
-        else if (score >= 25) grade = "جيد جداً 👍";
+        if (score >= 35) grade = "ممتاز ";
+        else if (score >= 25) grade = "جيد جداً ";
         else if (score >= 20) grade = "مقبول ⚠️";
         else grade = "يحتاج إلى مراجعة وتكرار ⚠️";
 
         document.getElementById('res-grade').innerText = grade;
 
-        // ضبط الدائرة
         const percent = (score / 40) * 100;
         document.getElementById('score-circle').style.setProperty('--percent', `${percent}%`);
         document.getElementById('score-text').innerText = score;
 
-        // إرسال التقرير إلى تليجرام
+        // إرسال التقرير لتليجرام
         sendToTelegram(studentName, studentCode, score, minutes, seconds, grade, wrongQuestions);
     }
 
     function sendToTelegram(name, code, score, m, s, grade, wrongArr) {
-        let wrongText = wrongArr.length > 0 ? wrongArr.join(', ') : 'لا يوجد إجابات خاطئة 🎉';
+        let wrongText = wrongArr.length > 0 ? wrongArr.join(', ') : 'لا يوجد إجابات خاطئة ';
         
-        const text = `📊 نتيجة اختبار فيزياء جديدة\n\n` +
-                     `👤 اسم الطالب: ${name}\n` +
-                     `🆔 الكود: ${code}\n` +
-                     `🎯 الدرجة: ${score} / 40\n` +
-                     `🏅 التقدير: ${grade}\n` +
-                     `⏱️ الوقت: ${m} دقيقة و ${s} ثانية\n` +
-                     `❌ الأسئلة الخاطئة: ${wrongText}`;
+        const message = ` نتيجة اختبار فيزياء جديدة\n\n` +
+                        ` اسم الطالب: ${name}\n` +
+                        ` الكود: ${code}\n` +
+                        ` الدرجة: ${score} / 40\n` +
+                        ` التقدير: ${grade}\n` +
+                        `⏱️ الوقت: ${m} دقيقة و ${s} ثانية\n` +
+                        `❌ الأسئلة الخاطئة: ${wrongText}`;
 
-        const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
+        // إنشاء نموذج ديناميكي للإرسال المباشر لتجاوز قيود CORS والـ Fetch
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
+        form.target = 'hidden_iframe';
 
-        fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                chat_id: CHAT_ID,
-                text: text
-            })
-        })
-        .then(res => res.json())
-        .then(data => console.log('Telegram Success:', data))
-        .catch(err => console.error("Error sending to telegram:", err));
+        const chatInput = document.createElement('input');
+        chatInput.type = 'hidden';
+        chatInput.name = 'chat_id';
+        chatInput.value = CHAT_ID;
+        form.appendChild(chatInput);
+
+        const textInput = document.createElement('input');
+        textInput.type = 'hidden';
+        textInput.name = 'text';
+        textInput.value = message;
+        form.appendChild(textInput);
+
+        document.body.appendChild(form);
+        form.submit();
+        document.body.removeChild(form);
     }
 </script>
 </body>
 </html>
+
